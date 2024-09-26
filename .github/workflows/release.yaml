@@ -14,22 +14,27 @@ jobs:
   check_changes:
     runs-on: ubuntu-latest
     outputs:
-      should_run: ${{ env.SHOULD_RUN }}
+      should_run: ${{ steps.check_changes.outputs.should_run }}
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Check for code changes
+        id: check_changes
         run: |
           if git diff --quiet @{1.day.ago} HEAD -- ':!.github'; then
+            echo "should_run=false" >> $GITHUB_OUTPUT
             echo "SHOULD_RUN=false" >> $GITHUB_ENV
+            echo "no changes detected"
           else
+            echo "should_run=true" >> $GITHUB_OUTPUT
             echo "SHOULD_RUN=true" >> $GITHUB_ENV
+            echo "changes detected"
           fi
 
   nightly-release:
     needs: check_changes
-    if: ${{ env.SHOULD_RUN == 'true' }}
+    if: needs.check_changes.outputs.should_run == 'true'
     runs-on: ${{ matrix.os }}
 
     strategy:
