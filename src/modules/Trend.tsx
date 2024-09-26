@@ -94,12 +94,13 @@ const TrendingLists: FC<{
 
       <ul className="mt-4 flex flex-col gap-3 pb-4">
         {data.map((item) => (
-          <li key={item.id} className="pl-2">
+          <li key={item.id}>
             <button
               type="button"
               className={cn(
-                'flex min-w-0 items-center w-full cursor-pointer',
+                'flex min-w-0 items-center w-full cursor-pointer pl-2',
                 'hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-md duration-200',
+                !!item.description && 'py-2 rounded-xl',
               )}
               onClick={() => {
                 followBridge.follow(item.id, { isList: true })
@@ -120,7 +121,9 @@ const TrendingLists: FC<{
 
                   <UserCount count={item.subscriberCount} />
                 </div>
-                <div className={cn('text-sm -mt-1')}>{item.description}</div>
+                <div className={cn('text-sm -mt-1 line-clamp-2')}>
+                  {item.description}
+                </div>
               </div>
             </button>
           </li>
@@ -140,7 +143,7 @@ const UserCount = ({ count }: { count: number }) => {
 }
 
 interface TopUserAvatarProps {
-  user: User
+  user: Models.User
   position: string
 }
 
@@ -273,7 +276,7 @@ const TrendingFeeds = ({ data }: { data: Models.TrendingFeed[] }) => {
                 <Button
                   type="button"
                   className={cn(
-                    'absolute right-2 inset-y-0 duration-200 group-hover:opacity-100 opacity-0',
+                    'absolute right-0 font-medium inset-y-0 duration-200 group-hover:opacity-100 opacity-0',
                   )}
                   onClick={() => {
                     followBridge.follow(feed.id, { isList: false })
@@ -301,12 +304,15 @@ const TrendingEntries = ({ data }: { data: Models.TrendingEntry[] }) => {
       <ul className="list-inside list-disc space-y-1">
         {filteredData.map((entry) => {
           return (
-            <li key={entry.id} className="marker:text-accent relative pr-10">
+            <li
+              key={entry.id}
+              className="marker:text-accent relative pr-10 whitespace-nowrap truncate"
+            >
               <a
                 href={entry.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="follow-link--underline text-sm"
+                className="follow-link--underline text-sm truncate"
               >
                 {entry.title}
               </a>
