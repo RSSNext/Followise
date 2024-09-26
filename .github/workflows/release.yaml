@@ -11,22 +11,25 @@ env:
   VITE_WEB_URL: ${{ vars.VITE_WEB_URL }}
 
 jobs:
-  check-for-changes:
+  check_changes:
     runs-on: ubuntu-latest
     outputs:
-      should_run: ${{ steps.check.outputs.should_run }}
+      should_run: ${{ env.SHOULD_RUN }}
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Check for code changes
-        id: check
         run: |
-          git diff --quiet @{1.day.ago} HEAD -- ':!.github' || echo "should_run=true" >> $GITHUB_OUTPUT
+          if git diff --quiet @{1.day.ago} HEAD -- ':!.github'; then
+            echo "SHOULD_RUN=false" >> $GITHUB_ENV
+          else
+            echo "SHOULD_RUN=true" >> $GITHUB_ENV
+          fi
 
   nightly-release:
-    needs: check-for-changes
-    if: needs.check-for-changes.outputs.should_run == 'true'
+    needs: check_changes
+    if: env.SHOULD_RUN == 'true'
     runs-on: ${{ matrix.os }}
 
     strategy:
