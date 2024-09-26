@@ -1,6 +1,9 @@
 name: Nightly Release
 
 on:
+  push:
+    branches:
+      - main
   schedule:
     - cron: '0 22 * * *' # Runs at 10 PM UTC every day
 
