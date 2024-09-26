@@ -29,7 +29,7 @@ jobs:
 
   nightly-release:
     needs: check_changes
-    if: env.SHOULD_RUN == 'true'
+    if: ${{ env.SHOULD_RUN == 'true' }}
     runs-on: ${{ matrix.os }}
 
     strategy:
