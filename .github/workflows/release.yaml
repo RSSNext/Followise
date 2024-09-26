@@ -19,18 +19,29 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
       - name: Check for code changes
         id: check_changes
         run: |
-          if git diff --quiet @{1.day.ago} HEAD -- ':!.github'; then
+          # 获取 24 小时前的时间戳
+          TWENTY_FOUR_HOURS_AGO=$(date -d '24 hours ago' '+%Y-%m-%d %H:%M:%S')
+
+          # 检查自 24 小时前以来是否有变更（排除.github 目录）
+          if git diff --quiet `git rev-list -n1 --before="$TWENTY_FOUR_HOURS_AGO" HEAD` HEAD -- ':!.github'; then
             echo "should_run=false" >> $GITHUB_OUTPUT
-            echo "SHOULD_RUN=false" >> $GITHUB_ENV
-            echo "no changes detected"
+            echo "No changes detected in the last 24 hours"
           else
             echo "should_run=true" >> $GITHUB_OUTPUT
-            echo "SHOULD_RUN=true" >> $GITHUB_ENV
-            echo "changes detected"
+            echo "Changes detected in the last 24 hours"
           fi
+
+          # 输出调试信息
+          echo "Current time: $(date '+%Y-%m-%d %H:%M:%S')"
+          echo "24 hours ago: $TWENTY_FOUR_HOURS_AGO"
+          echo "Commits in the last 24 hours:"
+          git log --since="24 hours ago" --oneline
+          echo "Files changed in the last 24 hours:"
+          git diff --name-only `git rev-list -n1 --before="$TWENTY_FOUR_HOURS_AGO" HEAD` HEAD -- ':!.github'
 
   nightly-release:
     needs: check_changes
