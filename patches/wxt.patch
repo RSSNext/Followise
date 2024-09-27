@@ -1,0 +1,18 @@
+diff --git a/dist/core/utils/building/resolve-config.mjs b/dist/core/utils/building/resolve-config.mjs
+index 5214a6ba031e00e95f4c28d796012f6a36503d31..e803c06da9a9d51973931621bf18c5ddbb2f6471 100644
+--- a/dist/core/utils/building/resolve-config.mjs
++++ b/dist/core/utils/building/resolve-config.mjs
+@@ -62,11 +62,11 @@ export async function resolveConfig(inlineConfig, command) {
+   });
+   const alias = Object.fromEntries(
+     Object.entries({
+-      ...mergedConfig.alias,
+       "@": srcDir,
+       "~": srcDir,
+       "@@": root,
+-      "~~": root
++      "~~": root,
++      ...mergedConfig.alias,
+     }).map(([key, value]) => [key, path.resolve(root, value)])
+   );
+   let devServerConfig;

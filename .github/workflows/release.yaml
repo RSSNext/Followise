@@ -1,0 +1,129 @@
+name: Nightly Release
+
+on:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: '0 22 * * *' # Runs at 10 PM UTC every day
+
+env:
+  VITE_WEB_URL: ${{ vars.VITE_WEB_URL }}
+
+jobs:
+  check_changes:
+    runs-on: ubuntu-latest
+    outputs:
+      should_run: ${{ steps.check_changes.outputs.should_run }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Check for code changes
+        id: check_changes
+        run: |
+          # 获取当前时间戳和 24 小时前的时间戳
+          CURRENT_TIMESTAMP=$(date +%s)
+          TWENTY_FOUR_HOURS_AGO_TIMESTAMP=$((CURRENT_TIMESTAMP - 86400))
+          
+          echo "Current timestamp: $CURRENT_TIMESTAMP"
+          echo "24 hours ago timestamp: $TWENTY_FOUR_HOURS_AGO_TIMESTAMP"
+          
+          echo "Commits in the last 24 hours:"
+          git log --since="@$TWENTY_FOUR_HOURS_AGO_TIMESTAMP" --format="%h %ct %s"
+          
+          echo "All changed files in the last 24 hours (including .github):"
+          git diff --name-only $(git rev-list -n1 --before="@$TWENTY_FOUR_HOURS_AGO_TIMESTAMP" HEAD) HEAD
+          
+          echo "Changed files excluding .github directory:"
+          CHANGED_FILES=$(git diff --name-only $(git rev-list -n1 --before="@$TWENTY_FOUR_HOURS_AGO_TIMESTAMP" HEAD) HEAD -- ':!.github')
+          
+          if [ -z "$CHANGED_FILES" ]; then
+            echo "should_run=false" >> $GITHUB_OUTPUT
+            echo "No changes detected outside .github directory in the last 24 hours"
+          else
+            echo "should_run=true" >> $GITHUB_OUTPUT
+            echo "Changes detected outside .github directory in the last 24 hours:"
+            echo "$CHANGED_FILES"
+          fi
+
+  nightly-release:
+    needs: check_changes
+    if: needs.check_changes.outputs.should_run == 'true'
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest]
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          lfs: true
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm i
+
+      - name: Set nightly version
+        shell: bash
+        run: |
+          # Get the current version from package.json
+          if [ -f package.json ]; then
+            CURRENT_VERSION=$(node -p "require('./package.json').version")
+            # Remove any existing prerelease identifier (e.g., -alpha.1)
+            BASE_VERSION=$(echo $CURRENT_VERSION | sed -E 's/(-[a-zA-Z]+\.[0-9]+)$//')
+            # Generate the nightly version
+            NIGHTLY_DATE=$(date +'%Y%m%d')
+            NIGHTLY_VERSION="${BASE_VERSION}-nightly.${NIGHTLY_DATE}"
+            echo "NIGHTLY_VERSION=$NIGHTLY_VERSION" >> $GITHUB_ENV
+            # Update version in package.json
+            if [[ "$RUNNER_OS" == "Windows" ]]; then
+              sed -i "s/\"version\": \".*\"/\"version\": \"$NIGHTLY_VERSION\"/" package.json
+            else
+              sed -i '' "s/\"version\": \".*\"/\"version\": \"$NIGHTLY_VERSION\"/" package.json
+            fi
+            echo "Updated version to $NIGHTLY_VERSION"
+          else
+            echo "package.json not found"
+            exit 1
+          fi
+
+      - name: Build
+
+        run: pnpm build
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.os }}-nightly
+          path: |
+            .output/chrome-mv3
+          retention-days: 7
+
+      - name: Create Nightly Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Nightly ${{ env.NIGHTLY_VERSION }}
+          draft: false
+          prerelease: true
+          files: |
+            .output/chrome-mv3
+          body: |
+            This is an automated nightly release for testing purposes.
+
+            **Warning:** This build may be unstable and is not recommended for production use.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
