@@ -58,7 +58,7 @@ function main() {
             disposers.push(injectEntryContent(feedIdOrOther, entryId))
           }
 
-          disposers.push(injectFeedColumns(feedIdOrOther))
+          disposers.push(injectFeedColumns())
 
           return () => disposers.map((e) => e())
         })
