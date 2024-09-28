@@ -1,10 +1,10 @@
-# Followise
-
 <div align="center">
   <a href="https://github.com/RSSNext/Followise">
     <img src="./public/icon/128.png" alt="Logo" width="80" height="80">
   </a>
-</div>
+  <h1>Followise</h1>
+</div> 
+
 
 
 ## Overview
