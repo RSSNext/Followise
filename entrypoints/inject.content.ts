@@ -26,11 +26,13 @@ function main() {
   let cachedDisposer: (() => any) | undefined
   const originalPushState = history.pushState
   history.pushState = function (...args) {
-    const path = args[2]
+    const path = args[2] as string
 
     cachedDisposer?.()
 
-    cachedDisposer = handleHistoryChange(path as string)
+    cachedDisposer = handleHistoryChange(
+      path.startsWith('#/') ? path.slice(1) : path,
+    )
     return originalPushState.apply(history, args)
   }
 
@@ -87,6 +89,8 @@ function main() {
       }
     }
   }
+
+  registerEventHandlers()
 }
 export default defineContentScript({
   matches: ['*://*.follow.is/*'],
@@ -106,6 +110,7 @@ function injectDiscover() {
 }
 function injectEntryContent(feedId: string, entryId: string) {
   const $article = document.querySelector(DOM_MAP.ENTRY_CONTENT)
+
   if (!$article) return
 
   return mountReactElement(
@@ -153,7 +158,7 @@ const waitingForPageReady = (
   canDo: (path: string) => boolean,
 ) => {
   const $element = document.querySelector(selector)
-  // console.log($element)
+
   if (!$element) {
     return setTimeout(() => {
       if (canDo(globalCurrentPath)) {
@@ -162,4 +167,9 @@ const waitingForPageReady = (
     }, 100)
   }
   return fn($element as HTMLElement)
+}
+
+const registerEventHandlers = () => {
+  const handleDetectElements = (e: MouseEvent) => {}
+  window.addEventListener('click', handleDetectElements)
 }

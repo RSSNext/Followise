@@ -98,7 +98,7 @@ const Comment: FC<{
               styles['comment__message'],
               'relative inline-block rounded-xl text-zinc-800 dark:text-zinc-200',
               'bg-zinc-600/5 dark:bg-zinc-500/20',
-              'max-w-[calc(100%-3rem)]',
+              'max-w-full',
               'rounded-tl-none',
               'ml-8 px-3 py-2 select-text text-sm',
             )}
