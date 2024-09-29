@@ -11,6 +11,14 @@ import { waitForReady } from '~/utils/dom'
 import { initRenderContainer, mountReactElement } from '~/utils/portal'
 import { isBizId } from '~/utils/utils'
 
+const getCurrentPath = () => {
+  const isHashRoute = window.location.hash.startsWith('#/')
+  if (isHashRoute) {
+    return window.location.hash.slice(1)
+  }
+
+  return window.location.pathname
+}
 let globalCurrentPath = ''
 function main() {
   initRenderContainer()
@@ -27,11 +35,11 @@ function main() {
   }
 
   window.addEventListener('popstate', () => {
-    const currentPath = window.location.pathname
+    const currentPath = getCurrentPath()
     cachedDisposer = handleHistoryChange(currentPath)
   })
 
-  const currentPath = window.location.pathname
+  const currentPath = getCurrentPath()
 
   cachedDisposer = handleHistoryChange(currentPath)
 

@@ -11,7 +11,7 @@ export interface RenderGlobalContext {
   toast: typeof toast
 
   getApiUrl: () => string
-  profile: (id: string, variant: 'modal' | 'drawer') => void
+  profile: (id: string, variant: 'dialog' | 'drawer') => void
 }
 
 const PREFIX = '__follow'

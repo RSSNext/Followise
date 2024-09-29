@@ -11,6 +11,7 @@ import { PhUsersBold } from '~/components/icons/users'
 import { LoadingCircle } from '~/components/loading'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~/components/tooltip'
 import { followBridge } from '~/utils/birdge'
+import { nextFrame, stopPropagation } from '~/utils/dom'
 
 import { IconoirBrightCrown } from '../components/icons/crown'
 import { DrawerModalLayout } from '../components/modal/layouts/drawer'
@@ -110,7 +111,7 @@ const TrendingLists: FC<{
                 name={item.title}
                 fallback
                 src={item.image}
-                size={40}
+                size={34}
                 className="rounded-xl"
               />
               <div className={cn('flex flex-col w-full ml-1 text-left')}>
@@ -135,7 +136,7 @@ const TrendingLists: FC<{
 
 const UserCount = ({ count }: { count: number }) => {
   return (
-    <span className="text-xs items-center flex text-gray-500 gap-0.5 -translate-y-0.5">
+    <span className="text-xs items-center flex text-gray-500 gap-0.5 tabular-nums -translate-y-0.5">
       <PhUsersBold className="size-3" />
       {count}
     </span>
@@ -174,10 +175,11 @@ const TrendingUsers: FC<{ data: Models.User[] }> = ({ data }) => {
         {/* Top 3 users */}
         {data.slice(0, 3).map((user, index: number) => (
           <button
+            onFocusCapture={stopPropagation}
             className="cursor-pointer"
             type="button"
             onClick={() => {
-              followBridge.profile(user.id, 'drawer')
+              followBridge.profile(user.id, 'dialog')
             }}
             key={user.id}
           >
@@ -200,10 +202,11 @@ const TrendingUsers: FC<{ data: Models.User[] }> = ({ data }) => {
           {data.slice(3).map((user) => (
             <li key={user.id} className="flex items-center gap-3">
               <button
+                onFocusCapture={stopPropagation}
                 className="cursor-pointer"
                 type="button"
                 onClick={() => {
-                  followBridge.profile(user.id, 'modal')
+                  followBridge.profile(user.id, 'dialog')
                 }}
               >
                 <FAvatar
@@ -228,7 +231,7 @@ const TrendingFeeds = ({ data }: { data: Models.TrendingFeed[] }) => {
     <section className="w-full text-left mt-8">
       <h2 className="text-xl font-bold my-2">Trending Feeds</h2>
 
-      <ul className="mt-4 flex flex-col">
+      <ul className="mt-2 flex flex-col">
         {data.map((feed) => {
           return (
             <li
@@ -301,7 +304,7 @@ const TrendingEntries = ({ data }: { data: Models.TrendingEntry[] }) => {
     <section className="w-full text-left mt-8">
       <h2 className="text-xl font-bold my-2">Trending Entries</h2>
 
-      <ul className="list-inside list-disc space-y-1">
+      <ul className="list-inside mt-2 list-disc space-y-1">
         {filteredData.map((entry) => {
           return (
             <li
