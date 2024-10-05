@@ -5,7 +5,7 @@ export interface RenderGlobalContext {
   showSetting: (path?: string) => void
 
   /// Actions
-  follow: (id: string, options?: { isList: boolean }) => void
+  follow: (options: { isList: boolean; id: string }) => void
 
   /// Utils
   toast: typeof toast

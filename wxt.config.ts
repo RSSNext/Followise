@@ -8,14 +8,13 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 export default defineConfig({
   modules: ['@wxt-dev/module-react'],
   browser: 'chrome',
-  manifest: async () => {
-    return {}
-  },
+
   dev: {
     server: {
       port: 3334,
     },
   },
+
   alias: {
     '~': 'src',
   },

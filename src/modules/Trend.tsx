@@ -104,7 +104,7 @@ const TrendingLists: FC<{
                 !!item.description && 'py-2 rounded-xl',
               )}
               onClick={() => {
-                followBridge.follow(item.id, { isList: true })
+                followBridge.follow({ isList: true, id: item.id })
               }}
             >
               <FeedIcon
@@ -282,7 +282,7 @@ const TrendingFeeds = ({ data }: { data: Models.TrendingFeed[] }) => {
                     'absolute right-0 font-medium inset-y-0 duration-200 group-hover:opacity-100 opacity-0',
                   )}
                   onClick={() => {
-                    followBridge.follow(feed.id, { isList: false })
+                    followBridge.follow({ isList: false, id: feed.id })
                   }}
                 >
                   Follow
