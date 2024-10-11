@@ -51,7 +51,9 @@ function main() {
     console.info('Route change', path)
     switch (true) {
       case path === '/discover': {
-        return waitForReady(injectDiscover)
+        // Trending support in Follow now.
+        return
+        // return waitForReady(injectDiscover)
       }
       case path.startsWith('/feeds'): {
         // /feeds/51109945767644160/60941346687490048?view=0
